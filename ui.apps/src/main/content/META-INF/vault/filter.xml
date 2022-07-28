@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workspaceFilter version="1.0">
+    <filter root="/apps/rampup/clientlibs"/>
+    <filter root="/apps/rampup/components"/>
+    <filter root="/apps/rampup/i18n"/>
+</workspaceFilter>

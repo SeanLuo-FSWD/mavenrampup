@@ -1,0 +1,7 @@
+{
+    "scripts": [
+        "create path (sling:OrderedFolder) /content/dam/rampup",
+        "create path (nt:unstructured) /content/dam/rampup/jcr:content",
+        "set properties on /content/dam/rampup/jcr:content\n  set cq:conf{String} to /conf/rampup\n  set jcr:title{String} to \"Ramp up Sean\"\nend"
+    ]
+}
