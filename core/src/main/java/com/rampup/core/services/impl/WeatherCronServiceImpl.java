@@ -1,10 +1,16 @@
 
 package com.rampup.core.services.impl;
 
-
+import com.google.gson.stream.JsonReader;
+import com.rampup.core.services.DataSourceService;
+import com.rampup.core.utils.ResolverUtil;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.scheduler.ScheduleOptions;
 import org.apache.sling.commons.scheduler.Scheduler;
 import org.json.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.*;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
@@ -14,8 +20,12 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Scanner;
@@ -49,6 +59,10 @@ public class WeatherCronServiceImpl implements Runnable {
 
     }
 
+    @Reference
+    private ResourceResolverFactory resourceResolverFactory;
+    @Reference
+    DataSourceService staticDataSourceService;
 
     private String cronServiceName;
 
@@ -67,6 +81,7 @@ public class WeatherCronServiceImpl implements Runnable {
     public void run() {
         System.out.println("printing out message: " + cronMessage);
         LOG.info("**** Scheduler run : {}", cronMessage);
+        this.getCities();
     }
 
     @Activate
@@ -163,4 +178,70 @@ public class WeatherCronServiceImpl implements Runnable {
         }
     }
 
+    public void getCities() {
+        LOG.info("getCities_____________getCities");
+        ResourceResolver resourceResolver = null;
+
+        String cityjsonstring;
+
+        try {
+            resourceResolver = ResolverUtil.newResolver(resourceResolverFactory);
+
+            InputStream cityJsonStream = this.staticDataSourceService.getJsonStreamFromJcr("/apps/rampup/datasources/cities/data.json", resourceResolver);
+
+            StringBuilder sb = new StringBuilder();
+            String line;
+            BufferedReader br = new BufferedReader(new
+                    InputStreamReader(cityJsonStream, StandardCharsets.UTF_8));
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+
+
+            LOG.info("444444444444444444444444444");
+            LOG.info(sb.toString());
+
+            JSONParser jsonParser = new JSONParser();
+            JSONObject jsonObject = (JSONObject)jsonParser.parse(
+                    new InputStreamReader(cityJsonStream, StandardCharsets.UTF_8));
+
+            LOG.info("555555555555555555555555555");
+            LOG.info(jsonObject.toJSONString());
+
+//            JsonReader reader = new JsonReader(new
+//                    InputStreamReader(cityJsonStream, StandardCharsets.UTF_8));
+//            LOG.info("555555555555555555555555555");
+//            LOG.info(reader.toString());
+
+//            URL url = new URL("http://api.openweathermap.org/data/2.5/onecall?appid=006711eab361a0245797b7f6c0b72c9d&lang=en&units=imperial&lat=59.9172601&lon=10.7435837");
+//
+//            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+//            conn.setRequestMethod("GET");
+//            conn.connect();
+//
+//            //Check if connect is made
+//            int responseCode = conn.getResponseCode();
+//
+//            // 200 OK
+//            if (responseCode != 200) {
+//                throw new RuntimeException("HttpResponseCode: " + responseCode);
+//            } else {
+//
+//                StringBuilder informationString = new StringBuilder();
+//                Scanner scanner = new Scanner(url.openStream());
+//
+//                while (scanner.hasNext()) {
+//                    informationString.append(scanner.nextLine());
+//                }
+//                //Close the scanner
+//                scanner.close();
+//
+//                LOG.info("222222222222222222222222222");
+//                LOG.info(informationString.toString());
+//
+//            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

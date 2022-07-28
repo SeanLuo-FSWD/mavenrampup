@@ -17,7 +17,7 @@ public final class ResolverUtil {
 
     }
 
-    public static final String SEAN_TEST_USER = "weather-test-user";
+    public static final String SEAN_TEST_USER = "weathertestuser";
     /**
      * @param  resourceResolverFactory factory
      * @return new resource resolver for Sony service user
